@@ -439,6 +439,13 @@ class InstagramAPI:
         return 'android-' + m.hexdigest()[:16]
 
     def generateUUID(self, type):
+        #according to https://github.com/LevPasha/Instagram-API-python/pull/16/files#r77118894
+        #uuid = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' % (random.randint(0, 0xffff),
+        #    random.randint(0, 0xffff), random.randint(0, 0xffff),
+        #    random.randint(0, 0x0fff) | 0x4000,
+        #    random.randint(0, 0x3fff) | 0x8000,
+        #    random.randint(0, 0xffff), random.randint(0, 0xffff),
+        #    random.randint(0, 0xffff))
         temp_uuid = str(uuid.uuid4())
         if (type):
             return temp_uuid
