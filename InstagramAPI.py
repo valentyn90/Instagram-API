@@ -446,11 +446,11 @@ class InstagramAPI:
         #    random.randint(0, 0x3fff) | 0x8000,
         #    random.randint(0, 0xffff), random.randint(0, 0xffff),
         #    random.randint(0, 0xffff))
-        temp_uuid = str(uuid.uuid4())
+        generated_uuid = str(uuid.uuid4())
         if (type):
-            return temp_uuid
+            return generated_uuid
         else:
-            return temp_uuid.replace('-', '')
+            return generated_uuid.replace('-', '')
 
     def buildBody(bodies, boundary):
         # TODO Instagram.php 1620-1645
