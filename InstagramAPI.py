@@ -477,6 +477,7 @@ class InstagramAPI:
         else:
             print ("Request return " + str(response.status_code) + " error!")
             return False
+            
     def getTotalFollowers(self,usernameId):
         followers = []
         next_max_id = ''
@@ -504,6 +505,12 @@ class InstagramAPI:
             if temp["big_list"] == False:
                 return followers            
             next_max_id = temp["next_max_id"]  
+    
+    def getTotalSelfFollowers(self):
+        return getTotalFollowers(self.username_id)
+    
+    def getTotalSelfFollowings(self):
+        return getTotalFollowings(self.username_id)
 
 
 InstagramAPI = InstagramAPI("login", "password")
