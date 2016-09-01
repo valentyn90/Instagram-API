@@ -6,6 +6,7 @@ import json
 import hashlib
 import hmac
 import urllib
+import uuid
 
 class InstagramAPI:
     API_URL = 'https://i.instagram.com/api/v1/'
@@ -438,16 +439,18 @@ class InstagramAPI:
         return 'android-' + m.hexdigest()[:16]
 
     def generateUUID(self, type):
-        uuid = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' % (random.randint(0, 0xffff),
-               random.randint(0, 0xffff), random.randint(0, 0xffff),
-               random.randint(0, 0x0fff) | 0x4000,
-               random.randint(0, 0x3fff) | 0x8000,
-               random.randint(0, 0xffff), random.randint(0, 0xffff),
-               random.randint(0, 0xffff))
+        #according to https://github.com/LevPasha/Instagram-API-python/pull/16/files#r77118894
+        #uuid = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' % (random.randint(0, 0xffff),
+        #    random.randint(0, 0xffff), random.randint(0, 0xffff),
+        #    random.randint(0, 0x0fff) | 0x4000,
+        #    random.randint(0, 0x3fff) | 0x8000,
+        #    random.randint(0, 0xffff), random.randint(0, 0xffff),
+        #    random.randint(0, 0xffff))
+        generated_uuid = str(uuid.uuid4())
         if (type):
-            return uuid
+            return generated_uuid
         else:
-            return uuid.replace('-', '')
+            return generated_uuid.replace('-', '')
 
     def buildBody(bodies, boundary):
         # TODO Instagram.php 1620-1645
@@ -477,6 +480,7 @@ class InstagramAPI:
         else:
             print ("Request return " + str(response.status_code) + " error!")
             return False
+            
     def getTotalFollowers(self,usernameId):
         followers = []
         next_max_id = ''
@@ -504,11 +508,9 @@ class InstagramAPI:
             if temp["big_list"] == False:
                 return followers            
             next_max_id = temp["next_max_id"]  
-
-
-InstagramAPI = InstagramAPI("login", "password")
-InstagramAPI.login() # login
-InstagramAPI.tagFeed("cat") # get media list by tag #cat
-media_id = InstagramAPI.LastJson # last response JSON
-InstagramAPI.like(media_id["ranked_items"][0]["pk"]) # like first media
-InstagramAPI.getUserFollowers(media_id["ranked_items"][0]["user"]["pk"]) # get first media owner followers
+    
+    def getTotalSelfFollowers(self):
+        return getTotalFollowers(self.username_id)
+    
+    def getTotalSelfFollowings(self):
+        return getTotalFollowings(self.username_id)
