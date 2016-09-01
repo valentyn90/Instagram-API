@@ -6,6 +6,7 @@ import json
 import hashlib
 import hmac
 import urllib
+import uuid
 
 class InstagramAPI:
     API_URL = 'https://i.instagram.com/api/v1/'
@@ -438,16 +439,11 @@ class InstagramAPI:
         return 'android-' + m.hexdigest()[:16]
 
     def generateUUID(self, type):
-        uuid = '%04x%04x-%04x-%04x-%04x-%04x%04x%04x' % (random.randint(0, 0xffff),
-               random.randint(0, 0xffff), random.randint(0, 0xffff),
-               random.randint(0, 0x0fff) | 0x4000,
-               random.randint(0, 0x3fff) | 0x8000,
-               random.randint(0, 0xffff), random.randint(0, 0xffff),
-               random.randint(0, 0xffff))
+        temp_uuid = str(uuid.uuid4())
         if (type):
-            return uuid
+            return temp_uuid
         else:
-            return uuid.replace('-', '')
+            return temp_uuid.replace('-', '')
 
     def buildBody(bodies, boundary):
         # TODO Instagram.php 1620-1645
