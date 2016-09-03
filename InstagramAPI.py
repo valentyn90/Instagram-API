@@ -313,7 +313,7 @@ class InstagramAPI:
 
     def getHashtagFeed(self, hashtagString, maxid = ''):
         # TODO Instagram.php 1230-1250
-        return False
+        return self.SendRequest('feed/tag/'+hashtagString+'/?max_id='+str(maxid)+'&rank_token='+self.rank_token+'&ranked_content=true&')
 
     def searchLocation(self, query):
         locationFeed = self.SendRequest('fbsearch/places/?rank_token='+ str(self.rank_token) +'&query=' + str(query))
@@ -322,7 +322,7 @@ class InstagramAPI:
 
     def getLocationFeed(self, locationId, maxid = ''):
         # TODO Instagram.php 1280-1300
-        return False
+        return self.SendRequest('feed/location/'+str(locationId)+'/?max_id='+maxid+'&rank_token='+self.rank_token+'&ranked_content=true&')
 
     def getPopularFeed(self):
         popularFeed = self.SendRequest('feed/popular/?people_teaser_supported=1&rank_token='+ str(self.rank_token) +'&ranked_content=true&')
