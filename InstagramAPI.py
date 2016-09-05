@@ -514,3 +514,13 @@ class InstagramAPI:
     
     def getTotalSelfFollowings(self):
         return getTotalFollowings(self.username_id)
+        
+    def getTotalLikedMedia(self,scan_rate = 1):
+        next_id = ''
+        liked_items = []
+        for x in range(0,scan_rate):
+            temp = self.getLikedMedia(next_id)
+            next_id = temp["next_max_id"]
+            for item in temp["items"]:
+                liked_items.append(item)
+        return liked_items
