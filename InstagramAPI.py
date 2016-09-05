@@ -479,6 +479,12 @@ class InstagramAPI:
             return True
         else:
             print ("Request return " + str(response.status_code) + " error!")
+            # for debugging
+            try:
+                self.LastResponse = response
+                self.LastJson = json.loads(response.text)
+            except:
+                pass
             return False
             
     def getTotalFollowers(self,usernameId):
