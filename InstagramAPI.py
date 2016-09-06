@@ -313,7 +313,7 @@ class InstagramAPI:
 
     def getHashtagFeed(self, hashtagString, maxid = ''):
         # TODO Instagram.php 1230-1250
-        return False
+        return self.SendRequest('feed/tag/'+hashtagString+'/?max_id='+str(maxid)+'&rank_token='+self.rank_token+'&ranked_content=true&')
 
     def searchLocation(self, query):
         locationFeed = self.SendRequest('fbsearch/places/?rank_token='+ str(self.rank_token) +'&query=' + str(query))
@@ -322,7 +322,7 @@ class InstagramAPI:
 
     def getLocationFeed(self, locationId, maxid = ''):
         # TODO Instagram.php 1280-1300
-        return False
+        return self.SendRequest('feed/location/'+str(locationId)+'/?max_id='+maxid+'&rank_token='+self.rank_token+'&ranked_content=true&')
 
     def getPopularFeed(self):
         popularFeed = self.SendRequest('feed/popular/?people_teaser_supported=1&rank_token='+ str(self.rank_token) +'&ranked_content=true&')
@@ -426,8 +426,8 @@ class InstagramAPI:
         })
         return self.SendRequest('friendships/show/'+ str(userId) +'/', self.generateSignature(data))
 
-    def getLikedMedia(self):
-        return self.SendRequest('feed/liked/?')
+    def getLikedMedia(self,maxid=''):
+        return self.SendRequest('feed/liked/?max_id='+str(maxid))
 
     def generateSignature(self, data):
         return 'ig_sig_key_version=' + self.SIG_KEY_VERSION + '&signed_body=' + hmac.new(self.IG_SIG_KEY.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest() + '.' + urllib.parse.quote(data)
@@ -479,6 +479,12 @@ class InstagramAPI:
             return True
         else:
             print ("Request return " + str(response.status_code) + " error!")
+            # for debugging
+            try:
+                self.LastResponse = response
+                self.LastJson = json.loads(response.text)
+            except:
+                pass
             return False
             
     def getTotalFollowers(self,usernameId):
@@ -514,3 +520,13 @@ class InstagramAPI:
     
     def getTotalSelfFollowings(self):
         return getTotalFollowings(self.username_id)
+        
+    def getTotalLikedMedia(self,scan_rate = 1):
+        next_id = ''
+        liked_items = []
+        for x in range(0,scan_rate):
+            temp = self.getLikedMedia(next_id)
+            next_id = temp["next_max_id"]
+            for item in temp["items"]:
+                liked_items.append(item)
+        return liked_items
