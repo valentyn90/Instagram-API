@@ -9,6 +9,7 @@ import urllib
 import uuid
 import time
 from ImageUtils import getImageSize
+from requests_toolbelt import MultipartEncoder
 
 class InstagramAPI:
     API_URL = 'https://i.instagram.com/api/v1/'
@@ -115,7 +116,6 @@ class InstagramAPI:
     def uploadPhoto(self, photo, caption = None, upload_id = None):
         if upload_id is None:
             upload_id = str(int(time.time() * 1000))
-        from requests_toolbelt import MultipartEncoder
         data = {
         'upload_id'         : upload_id,
         '_uuid'             : self.uuid,
