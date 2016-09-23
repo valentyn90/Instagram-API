@@ -353,11 +353,13 @@ class InstagramAPI:
         return query
 
     def getUserFeed(self, usernameId, maxid = '', minTimestamp = None):
+        query = self.SendRequest('feed/user/' + str(usernameId) + '/?max_id=' + str(maxid) + '&min_timestamp=' + str(minTimestamp)
+            + '&rank_token='+ str(self.rank_token) +'&ranked_content=true')
         # TODO Instagram.php 1200-1220
-        return False
+        return query
 
-    def getSelfUserFeed(self):
-        return self.getUserFeed(self.username_id)
+    def getSelfUserFeed(self, maxid = '', minTimestamp = None):
+        return self.getUserFeed(self.username_id, maxid, minTimestamp)
 
     def getHashtagFeed(self, hashtagString, maxid = ''):
         # TODO Instagram.php 1230-1250
@@ -561,7 +563,22 @@ class InstagramAPI:
 
             if temp["big_list"] == False:
                 return followers            
-            next_max_id = temp["next_max_id"]  
+            next_max_id = temp["next_max_id"] 
+
+    def getTotalUserFeed(self, usernameId, minTimestamp = None):
+        user_feed = []
+        next_max_id = ''
+        while 1:
+            self.getUserFeed(usernameId, next_max_id, minTimestamp)
+            temp = self.LastJson
+            for item in temp["items"]:
+                user_feed.append(item)
+            if temp["more_available"] == False:
+                return user_feed
+            next_max_id = temp["next_max_id"]
+
+    def getTotalSelfUserFeed(self, minTimestamp = None):
+        return self.getTotalUserFeed(self.username_id, minTimestamp) 
     
     def getTotalSelfFollowers(self):
         return getTotalFollowers(self.username_id)
@@ -574,6 +591,7 @@ class InstagramAPI:
         liked_items = []
         for x in range(0,scan_rate):
             temp = self.getLikedMedia(next_id)
+            temp = self.LastJson
             next_id = temp["next_max_id"]
             for item in temp["items"]:
                 liked_items.append(item)
