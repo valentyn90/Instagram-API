@@ -117,11 +117,11 @@ This is python port of https://github.com/mgp25/Instagram-API, written on PHP. W
 
 53) getLikedMedia;
 
+54) uploadPhoto;
+
 ### TODO:
 
 1) changeProfilePicture;
-
-2) uploadPhoto;
 
 3) uploadVideo;
 
