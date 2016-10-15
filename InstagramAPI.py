@@ -46,10 +46,7 @@ class InstagramAPI:
     def setUser(self, username, password):
         self.username = username
         self.password = password
-
         self.uuid = self.generateUUID(True)
-
-        # TODO save data to file...
 
     def login(self, force = False):
         if (not self.isLoggedIn or force):
@@ -111,7 +108,6 @@ class InstagramAPI:
 
     def logout(self):
         logout = self.SendRequest('accounts/logout/')
-        # TODO Instagram.php 180-185
 
     def uploadPhoto(self, photo, caption = None, upload_id = None):
         if upload_id is None:
@@ -283,22 +279,18 @@ class InstagramAPI:
 
     def getRecentActivity(self):
         activity = self.SendRequest('news/inbox/?')
-        # TODO Instagram.php 911-925
         return activity
 
     def getFollowingRecentActivity(self):
         activity = self.SendRequest('news/?')
-        # TODO Instagram.php 935-945
         return activity
 
     def getv2Inbox(self):
         inbox = self.SendRequest('direct_v2/inbox/?')
-        # TODO Instagram.php 950-960
         return inbox
 
     def getUserTags(self, usernameId):
         tags = self.SendRequest('usertags/'+ str(usernameId) +'/feed/?rank_token='+ str(self.rank_token) +'&ranked_content=true&')
-        # TODO Instagram.php 975-985
         return tags
 
     def getSelfUserTags(self):
@@ -306,17 +298,14 @@ class InstagramAPI:
 
     def tagFeed(self, tag):
         userFeed = self.SendRequest('feed/tag/'+ str(tag) +'/?rank_token=' + str(self.rank_token) + '&ranked_content=true&')
-        # TODO Instagram.php 1000-1015
         return userFeed
 
     def getMediaLikers(self, mediaId):
         likers = self.SendRequest('media/'+ str(mediaId) +'/likers/?')
-        # TODO Instagram.php 1025-1035
         return likers
 
     def getGeoMedia(self, usernameId):
         locations = self.SendRequest('maps/user/'+ str(usernameId) +'/')
-        # TODO Instagram.php 1050-1060
         return locations
 
     def getSelfGeoMedia(self):
@@ -324,18 +313,15 @@ class InstagramAPI:
 
     def fbUserSearch(self, query):
         query = self.SendRequest('fbsearch/topsearch/?context=blended&query='+ str(query) +'&rank_token='+ str(self.rank_token))
-        # TODO Instagram.php 1080-1090
         return query
 
     def searchUsers(self, query):
         query = self.SendRequest('users/search/?ig_sig_key_version='+ str(self.SIG_KEY_VERSION)
                 +'&is_typeahead=true&query='+ str(query) +'&rank_token='+ str(self.rank_token))
-        # TODO Instagram.php 1100-1110
         return query
 
     def searchUsername(self, usernameName):
         query = self.SendRequest('users/'+ str(usernameName) +'/usernameinfo/')
-        # TODO Instagram.php 1080-1090
         return query
 
     def syncFromAdressBook(self, contacts):
@@ -343,39 +329,32 @@ class InstagramAPI:
 
     def searchTags(self, query):
         query = self.SendRequest('tags/search/?is_typeahead=true&q='+ str(query) +'&rank_token='+ str(self.rank_token))
-        # TODO Instagram.php 1160-1170
         return query
 
     def getTimeline(self):
         query = self.SendRequest('feed/timeline/?rank_token='+ str(self.rank_token) +'&ranked_content=true&')
-        # TODO Instagram.php 1180-1190
         return query
 
     def getUserFeed(self, usernameId, maxid = '', minTimestamp = None):
         query = self.SendRequest('feed/user/' + str(usernameId) + '/?max_id=' + str(maxid) + '&min_timestamp=' + str(minTimestamp)
             + '&rank_token='+ str(self.rank_token) +'&ranked_content=true')
-        # TODO Instagram.php 1200-1220
         return query
 
     def getSelfUserFeed(self, maxid = '', minTimestamp = None):
         return self.getUserFeed(self.username_id, maxid, minTimestamp)
 
     def getHashtagFeed(self, hashtagString, maxid = ''):
-        # TODO Instagram.php 1230-1250
         return self.SendRequest('feed/tag/'+hashtagString+'/?max_id='+str(maxid)+'&rank_token='+self.rank_token+'&ranked_content=true&')
 
     def searchLocation(self, query):
         locationFeed = self.SendRequest('fbsearch/places/?rank_token='+ str(self.rank_token) +'&query=' + str(query))
-        # TODO Instagram.php 1250-1270
         return locationFeed
 
     def getLocationFeed(self, locationId, maxid = ''):
-        # TODO Instagram.php 1280-1300
         return self.SendRequest('feed/location/'+str(locationId)+'/?max_id='+maxid+'&rank_token='+self.rank_token+'&ranked_content=true&')
 
     def getPopularFeed(self):
         popularFeed = self.SendRequest('feed/popular/?people_teaser_supported=1&rank_token='+ str(self.rank_token) +'&ranked_content=true&')
-        # TODO Instagram.php 1315-1325
         return popularFeed
 
     def getUserFollowings(self, usernameId, maxid = ''):
