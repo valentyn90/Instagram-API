@@ -216,12 +216,11 @@ class InstagramAPI:
         })
         return self.SendRequest('media/'+ str(mediaId) +'/comment/', self.generateSignature(data))
 
-    def deleteComment(self, mediaId, captionText, commentId):
+    def deleteComment(self, mediaId, commentId):
         data = json.dumps({
         '_uuid'        : self.uuid,
         '_uid'         : self.username_id,
-        '_csrftoken'   : self.token,
-        'caption_text' : captionText
+        '_csrftoken'   : self.token
         })
         return self.SendRequest('media/'+ str(mediaId) +'/comment/'+ str(commentId) +'/delete/', self.generateSignature(data))
 
