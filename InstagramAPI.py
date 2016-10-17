@@ -202,6 +202,20 @@ class InstagramAPI:
         'media_id'     : mediaId
         })
         return self.SendRequest('media/'+ str(mediaId) +'/delete/', self.generateSignature(data))
+   
+    def changePassword(self, newPassword):
+        data = json.dumps({
+        '_uuid'        : self.uuid,
+        '_uid'         : self.username_id,
+        '_csrftoken'   : self.token,
+        'old_password'  : self.password,
+        'new_password1' : newPassword,
+        'new_password2' : newPassword
+        })
+        return self.SendRequest('accounts/change_password/', self.generateSignature(data))
+    
+    def explore(self):
+        return self.SendRequest('discover/explore/')
 
     def comment(self, mediaId, commentText):
         data = json.dumps({
