@@ -472,7 +472,7 @@ class InstagramAPI:
         return self.SendRequest('feed/liked/?max_id='+str(maxid))
 
     def generateSignature(self, data):
-        return 'ig_sig_key_version=' + self.SIG_KEY_VERSION + '&signed_body=' + hmac.new(self.IG_SIG_KEY.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest() + '.' + urllib.quote(data)
+        return 'ig_sig_key_version=' + self.SIG_KEY_VERSION + '&signed_body=' + hmac.new(self.IG_SIG_KEY.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest() + '.' + urllib.parse.quote(data)
 
     def generateDeviceId(self, seed):
         volatile_seed = "12345"
