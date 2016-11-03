@@ -339,7 +339,7 @@ class InstagramAPI:
         return query
 
     def syncFromAdressBook(self, contacts):
-        return self.SendRequest('address_book/link/?include=extra_display_name,thumbnails', json.dumps(contacts))
+        return self.SendRequest('address_book/link/?include=extra_display_name,thumbnails', "contacts=" + json.dumps(contacts))
 
     def searchTags(self, query):
         query = self.SendRequest('tags/search/?is_typeahead=true&q='+ str(query) +'&rank_token='+ str(self.rank_token))
