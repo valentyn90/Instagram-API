@@ -573,10 +573,10 @@ class InstagramAPI:
         return self.getTotalUserFeed(self.username_id, minTimestamp) 
     
     def getTotalSelfFollowers(self):
-        return getTotalFollowers(self.username_id)
+        return self.getTotalFollowers(self.username_id)
     
     def getTotalSelfFollowings(self):
-        return getTotalFollowings(self.username_id)
+        return self.getTotalFollowings(self.username_id)
         
     def getTotalLikedMedia(self,scan_rate = 1):
         next_id = ''
