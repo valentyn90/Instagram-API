@@ -463,8 +463,10 @@ class InstagramAPI:
         return self.getUserFollowings(self.username_id)
 
     def getUserFollowers(self, usernameId, maxid = ''):
-        return self.SendRequest('friendships/'+ str(usernameId) +'/followers/?max_id='+ str(maxid)
-            +'&ig_sig_key_version='+ self.SIG_KEY_VERSION +'&rank_token='+ self.rank_token)
+        if maxid == '':
+            return self.SendRequest('friendships/'+ str(usernameId) +'/followers/?rank_token='+ self.rank_token)
+        else:
+            return self.SendRequest('friendships/'+ str(usernameId) +'/followers/?rank_token='+ self.rank_token + '&max_id='+ str(maxid))
 
     def getSelfUserFollowers(self):
         return self.getUserFollowers(self.username_id)
