@@ -1,5 +1,6 @@
 ﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import requests
 import random
 import json
@@ -10,6 +11,12 @@ import uuid
 import time
 import copy
 import math
+import sys
+
+#For Python 3.x, urllib is split so we must import another library
+if sys.version_info.major == 3:
+    import urllib.parse
+
 from ImageUtils import getImageSize
 from requests_toolbelt import MultipartEncoder
 from moviepy.editor import VideoFileClip
@@ -558,7 +565,12 @@ class InstagramAPI:
         return self.SendRequest('feed/liked/?max_id='+str(maxid))
 
     def generateSignature(self, data):
-        return 'ig_sig_key_version=' + self.SIG_KEY_VERSION + '&signed_body=' + hmac.new(self.IG_SIG_KEY.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest() + '.' + urllib.parse.quote(data)
+        try:
+            parsedData = urllib.parse.quote(data)
+        except AttributeError:
+            parsedData = urllib.quote(data)
+
+        return 'ig_sig_key_version=' + self.SIG_KEY_VERSION + '&signed_body=' + hmac.new(self.IG_SIG_KEY.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest() + '.' + parsedData
 
     def generateDeviceId(self, seed):
         volatile_seed = "12345"
