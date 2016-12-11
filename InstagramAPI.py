@@ -13,7 +13,7 @@ import copy
 import math
 import sys
 
-#For Python 3.x, urllib is split so we must import another library
+#The urllib library was split into other modules from Python 2 to Python 3
 if sys.version_info.major == 3:
     import urllib.parse
 
