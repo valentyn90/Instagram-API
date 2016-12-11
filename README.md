@@ -13,17 +13,17 @@ This is python port of https://github.com/mgp25/Instagram-API, written on PHP. W
 
 1. Fork/Clone/Download this repo
 
-    git clone https://github.com/LevPasha/Instagram-API-python.git
+    `git clone https://github.com/LevPasha/Instagram-API-python.git`
 
 
 2. Navigate to the directory
 
-    cd Instagram-API-python
+    `cd Instagram-API-python`
 
 
 3. Install the dependencies
 
-    https://github.com/LevPasha/Instagram-API-python.git
+    `https://github.com/LevPasha/Instagram-API-python.git`
 
 
 4. Modify test.py with your own username and password
@@ -31,7 +31,7 @@ This is python port of https://github.com/mgp25/Instagram-API, written on PHP. W
 
 5. Run the test script
 
-    python test.py
+    `python test.py`
     
 
 ### Now InstagramAPI.py can:
