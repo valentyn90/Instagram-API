@@ -9,6 +9,31 @@ Unofficial instagram API, give you access to ALL instagram features (like, follo
 
 This is python port of https://github.com/mgp25/Instagram-API, written on PHP. Work in progress to copy all functional...
 
+### Installation Instructions
+
+1. Fork/Clone/Download this repo
+
+    git clone https://github.com/LevPasha/Instagram-API-python.git
+
+
+2. Navigate to the directory
+
+    cd Instagram-API-python
+
+
+3. Install the dependencies
+
+    https://github.com/LevPasha/Instagram-API-python.git
+
+
+4. Modify test.py with your own username and password
+
+
+5. Run the test script
+
+    python test.py
+    
+
 ### Now InstagramAPI.py can:
 
 1) login;
