@@ -5,9 +5,36 @@
 <a href="https://github.com/LevPasha/Instagram-bot-cs" title="Instagram C# bot"><img src="https://img.shields.io/badge/C%23%20InstaBot-v1.0-blue.svg"></a>
 <a href="https://github.com/LevPasha/instabot.py" title="python InstaBot"><img src="https://img.shields.io/badge/python%20InstaBot-v1.0.1-blue.svg"></a>
 
-Unofficial instagram API, give you access to ALL instagram features (like, follow, upload photo and video and etc)! Write on python.
+Unofficial Instagram API to give you access to ALL Instagram features (like, follow, upload photo and video, etc)! Written in Python.
 
-This is python port of https://github.com/mgp25/Instagram-API, written on PHP. Work in progress to copy all functional...
+This is the Python port of https://github.com/mgp25/Instagram-API which is written in PHP. 
+It is still a work in progress to copy all of its API endpoints.
+
+
+### Installation Instructions
+
+1. Fork/Clone/Download this repo
+
+    `git clone https://github.com/LevPasha/Instagram-API-python.git`
+
+
+2. Navigate to the directory
+
+    `cd Instagram-API-python`
+
+
+3. Install the dependencies
+
+    `https://github.com/LevPasha/Instagram-API-python.git`
+
+
+4. Modify test.py with your own username and password
+
+
+5. Run the test script
+
+    `python test.py`
+    
 
 ### Now InstagramAPI.py can:
 
