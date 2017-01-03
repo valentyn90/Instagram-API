@@ -25,7 +25,7 @@ It is still a work in progress to copy all of its API endpoints.
 
 3. Install the dependencies
 
-    `https://github.com/LevPasha/Instagram-API-python.git`
+    `pip install requirements.txt`
 
 
 4. Modify test.py with your own username and password
