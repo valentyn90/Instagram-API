@@ -7,7 +7,7 @@
 
 Unofficial Instagram API to give you access to ALL Instagram features (like, follow, upload photo and video, etc)! Written in Python.
 
-This is the Python port of https://github.com/mgp25/Instagram-API which is written in PHP. 
+This is the Python port of https://github.com/mgp25/Instagram-API which is written in PHP.
 It is still a work in progress to copy all of its API endpoints.
 
 
@@ -31,10 +31,10 @@ It is still a work in progress to copy all of its API endpoints.
 4. Modify test.py with your own username and password
 
 
-5. Run the test script
+5. Run the test script (**use text editor to edit the script and type in valid Instagram username/password**)
 
     `python test.py`
-    
+
 
 ### Now InstagramAPI.py can:
 
