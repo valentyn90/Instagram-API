@@ -25,7 +25,7 @@ It is still a work in progress to copy all of its API endpoints.
 
 3. Install the dependencies
 
-    `pip install requirements.txt`
+    `pip install -r requirements.txt`
 
 
 4. Modify test.py with your own username and password
