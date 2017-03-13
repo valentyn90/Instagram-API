@@ -12,6 +12,9 @@ import time
 import copy
 import math
 import sys
+from datetime import datetime
+import calendar
+import os
 
 #The urllib library was split into other modules from Python 2 to Python 3
 if sys.version_info.major == 3:
@@ -207,8 +210,65 @@ class InstagramAPI:
         return False
 
     def direct_share(self, media_id, recipients, text = None):
-        # TODO Instagram.php 420-490
-        return False
+        if type(recipients) != type([]):
+            recipients = [str(recipients)]
+        recipient_users = '"",""'.join(str(r) for r in recipients)
+        endpoint = 'direct_v2/threads/broadcast/media_share/?media_type=photo'
+        boundary = self.uuid
+        bodies   = [
+            {
+                'type' : 'form-data',
+                'name' : 'media_id',
+                'data' : media_id,
+            },
+            {
+                'type' : 'form-data',
+                'name' : 'recipient_users',
+                'data' : '[["{}"]]'.format(recipient_users),
+            },
+            {
+                'type' : 'form-data',
+                'name' : 'client_context',
+                'data' : self.uuid,
+            },
+            {
+                'type' : 'form-data',
+                'name' : 'thread_ids',
+                'data' : '["0"]',
+            },
+            {
+                'type' : 'form-data',
+                'name' : 'text',
+                'data' : text or '',
+            },
+        ]
+        data = self.buildBody(bodies,boundary)
+        self.s.headers.update (
+            {
+                'User-Agent' : self.USER_AGENT,
+                'Proxy-Connection' : 'keep-alive',
+                'Connection': 'keep-alive',
+                'Accept': '*/*',
+                'Content-Type': 'multipart/form-data; boundary={}'.format(boundary),
+                'Accept-Language': 'en-en',
+            }
+        )
+        #self.SendRequest(endpoint,post=data) #overwrites 'Content-type' header and boundary is missed
+        response = self.s.post(self.API_URL + endpoint, data=data)
+        
+        if response.status_code == 200:
+            self.LastResponse = response
+            self.LastJson = json.loads(response.text)
+            return True
+        else:
+            print ("Request return " + str(response.status_code) + " error!")
+            # for debugging
+            try:
+                self.LastResponse = response
+                self.LastJson = json.loads(response.text)
+            except:
+                pass
+            return False
 
     def configureVideo(self, upload_id, video, thumbnail, caption = ''):
         clip = VideoFileClip(video)
@@ -592,23 +652,37 @@ class InstagramAPI:
             return generated_uuid
         else:
             return generated_uuid.replace('-', '')
-
-    def buildBody(bodies, boundary):
-        # TODO Instagram.php 1620-1645
-        return False
-
+    
+    def generateUploadId():
+        return str(calendar.timegm(datetime.utcnow().utctimetuple()))
+    
+    def buildBody(self,bodies, boundary):
+        body = u''
+        for b in bodies:
+            body += u'--{boundary}\r\n'.format(boundary=boundary)
+            body += u'Content-Disposition: {b_type}; name="{b_name}"'.format(b_type = b['type'], b_name = b['name'])
+            _filename = b.get('filename',None)
+            _headers  = b.get('headers',None)
+            if _filename:
+                _filename, ext = os.path.splitext(_filename)
+                _body += u'; filename="pending_media_{uid}.{ext}"'.format(uid = self.generateUploadId(), ext = ext)
+            if _headers and type(_headers) == type([]):
+                for h in _headers:
+                    _body += u'\r\n{header}'.format(header = h)
+            body += u'\r\n\r\n{data}\r\n'.format(data = b['data'])
+        body += u'--{boundary}--'.format(boundary = boundary)
+        return body;
+    
     def SendRequest(self, endpoint, post = None, login = False):
         if (not self.isLoggedIn and not login):
             raise Exception("Not logged in!\n")
             return;
-
         self.s.headers.update ({'Connection' : 'close',
                                 'Accept' : '*/*',
                                 'Content-type' : 'application/x-www-form-urlencoded; charset=UTF-8',
                                 'Cookie2' : '$Version=1',
                                 'Accept-Language' : 'en-US',
                                 'User-Agent' : self.USER_AGENT})
-
         if (post != None): # POST
             response = self.s.post(self.API_URL + endpoint, data=post) # , verify=False
         else: # GET
