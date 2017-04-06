@@ -557,8 +557,8 @@ class InstagramAPI:
         })
         return self.SendRequest('media/'+ str(mediaId) +'/unlike/', self.generateSignature(data))
 
-    def getMediaComments(self, mediaId):
-        return self.SendRequest('media/'+ mediaId +'/comments/?')
+    def getMediaComments(self, mediaId, max_id=''):
+        return self.SendRequest('media/'+ mediaId +'/comments/?max_id='+max_id)
 
     def setNameAndPhone(self, name = '', phone = ''):
         data = json.dumps({
