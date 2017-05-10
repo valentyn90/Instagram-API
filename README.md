@@ -13,28 +13,15 @@ It is still a work in progress to copy all of its API endpoints.
 
 
 ### Installation Instructions
+1. Install via pip
 
-1. Fork/Clone/Download this repo
-
-    `git clone https://github.com/LevPasha/Instagram-API-python.git`
-
-
-2. Navigate to the directory
-
-    `cd Instagram-API-python`
+    `pip install -e git+https://github.com/LevPasha/Instagram-API-python.git#egg=InstagramAPI`
 
 
-3. Install the dependencies
+2. Import InstagramAPI from a python command prompt
 
-    `pip install -r requirements.txt`
+    `from InstagramAPI import InstagramAPI`
 
-
-4. Modify test.py with your own username and password
-
-
-5. Run the test script (**use text editor to edit the script and type in valid Instagram username/password**)
-
-    `python test.py`
 
 
 ### Now InstagramAPI.py can:
