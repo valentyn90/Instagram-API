@@ -7,7 +7,7 @@ setup(name='instagram-api',
     author='Pasha Lev',
     author_email='levpasha@gmail.com',
     license='GNU',
-    packages=['instagram_api'],
+    packages=['InstagramAPI'],
     zip_safe=False,
     install_requires=[
       "requests==2.11.1",
