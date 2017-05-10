@@ -759,13 +759,16 @@ class InstagramAPI:
     def getTotalSelfFollowings(self):
         return self.getTotalFollowings(self.username_id)
         
-    def getTotalLikedMedia(self,scan_rate = 1):
+    def getTotalLikedMedia(self, scan_rate = 1):
         next_id = ''
         liked_items = []
-        for x in range(0,scan_rate):
+        for x in range(0, scan_rate):
             temp = self.getLikedMedia(next_id)
             temp = self.LastJson
-            next_id = temp["next_max_id"]
-            for item in temp["items"]:
-                liked_items.append(item)
+            try:
+                next_id = temp["next_max_id"]
+                for item in temp["items"]:
+                    liked_items.append(item)
+            except KeyError as e:
+                break
         return liked_items
