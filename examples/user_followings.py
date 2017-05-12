@@ -2,15 +2,13 @@ from InstagramAPI import InstagramAPI
 import time
 from datetime import datetime
 
-username = 'xiscugarcia'
-pwd      = 'xisquet'
-username = 'Bowmacntmj5617'
-pwd = 'Zzrk9qzlrR'
+username = ''
+pwd = ''
 
 
 API = InstagramAPI(username,pwd)
 API.login()
-user_id  = '200361318'
+user_id  = ''
 API.getUsernameInfo(user_id)
 API.LastJson
 following   = []

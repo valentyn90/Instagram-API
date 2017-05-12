@@ -2,8 +2,8 @@ from InstagramAPI import InstagramAPI
 import time
 from datetime import datetime
 
-username = 'xiscugarcia'
-pwd      = 'xisquet'
+username = ''
+pwd      = ''
 media_id = '1477006830906870775_19343908'
 
 #stop conditions, the script will end when first of them will be true
