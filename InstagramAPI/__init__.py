@@ -20,7 +20,12 @@ import os
 if sys.version_info.major == 3:
     import urllib.parse
 
-from ImageUtils import getImageSize
+try:
+    from ImageUtils import getImageSize
+except:
+    #Issue 159, python3 import fix
+    from .ImageUtils import getImageSize
+
 from requests_toolbelt import MultipartEncoder
 from moviepy.editor import VideoFileClip
 
