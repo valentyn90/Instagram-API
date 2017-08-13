@@ -460,6 +460,13 @@ class InstagramAPI:
         inbox = self.SendRequest('direct_v2/inbox/?')
         return inbox
 
+    def getv2Threads(self, thread, cursor=None):
+        endpoint = 'direct_v2/threads/{0}'.format(thread)
+        if cursor is not None:
+            endpoint += '?cursor={0}'.format(cursor)
+        inbox = self.SendRequest(endpoint)
+        return inbox
+
     def getUserTags(self, usernameId):
         tags = self.SendRequest('usertags/'+ str(usernameId) +'/feed/?rank_token='+ str(self.rank_token) +'&ranked_content=true&')
         return tags
