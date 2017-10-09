@@ -127,7 +127,7 @@ class InstagramAPI:
     def logout(self):
         logout = self.SendRequest('accounts/logout/')
 
-    def uploadPhoto(self, photo, caption = None, upload_id = None):
+    def uploadPhoto(self, photo, caption = None, upload_id = None, is_sidecar = None):
         if upload_id is None:
             upload_id = str(int(time.time() * 1000))
         data = {
@@ -137,6 +137,8 @@ class InstagramAPI:
         'image_compression' : '{"lib_name":"jt","lib_version":"1.3.0","quality":"87"}',
         'photo'             : ('pending_media_%s.jpg'%upload_id, open(photo, 'rb'), 'application/octet-stream', {'Content-Transfer-Encoding':'binary'})
         }
+        if is_sidecar:
+            data['is_sidecar']='1'
         m = MultipartEncoder(data, boundary=self.uuid)
         self.s.headers.update ({'X-IG-Capabilities' : '3Q4=',
                                 'X-IG-Connection-Type' : 'WIFI',
@@ -152,7 +154,7 @@ class InstagramAPI:
                 self.expose()
         return False
 
-    def uploadVideo(self, video, thumbnail, caption = None, upload_id = None):
+    def uploadVideo(self, video, thumbnail, caption = None, upload_id = None, is_sidecar = None):
         if upload_id is None:
             upload_id = str(int(time.time() * 1000))
         data = {
@@ -161,6 +163,8 @@ class InstagramAPI:
             'media_type': '2',
             '_uuid': self.uuid,
         }
+        if is_sidecar:
+            data['is_sidecar']='1'
         m = MultipartEncoder(data, boundary=self.uuid)
         self.s.headers.update({'X-IG-Capabilities': '3Q4=',
                                'X-IG-Connection-Type': 'WIFI',
@@ -214,6 +218,207 @@ class InstagramAPI:
                     self.expose()
         return False
 
+
+    def uploadAlbum(self, media, caption = None, upload_id=None):
+        if not media:
+            raise Exception("List of media to upload can't be empty.")
+        
+        if len(media)<2 or len(media)>10:
+            raise Exception('Instagram requires that albums contain 2-10 items. You tried to submit {}.'.format(len(media)))
+        
+        
+        # Figure out the media file details for ALL media in the album.
+        # NOTE: We do this first, since it validates whether the media files are
+        # valid and lets us avoid wasting time uploading totally invalid albums!
+        for idx,item in enumerate(media):
+            if not item.get('file','') or item.get('tipe',''):
+                raise Exception ('Media at index "{}" does not have the required "file" and "type" keys.'.format(idx))
+            
+            #$itemInternalMetadata = new InternalMetadata();
+            # If usertags are provided, verify that the entries are valid.
+            if item.get('usertags',[]):
+                self.throwIfInvalidUsertags(item['usertags'])
+            
+            # Pre-process media details and throw if not allowed on Instagram.
+            if item.get('type','')=='photo':
+                # Determine the photo details.
+                pass#$itemInternalMetadata->setPhotoDetails(Constants::FEED_TIMELINE_ALBUM, $item['file']);
+                
+            elif  item.get('type','')=='video':
+                # Determine the video details.
+                pass#$itemInternalMetadata->setVideoDetails(Constants::FEED_TIMELINE_ALBUM, $item['file']);
+                
+            else:
+                raise Exception('Unsupported album media type "{}".'.format(item['type']))
+            
+            itemInternalMetadata = {}
+            item['internalMetadata'] = itemInternalMetadata;
+            
+        #Perform all media file uploads.
+        for idx,item in enumerate(media):
+            itemInternalMetadata = item['internalMetadata']
+            item_upload_id = self.generateUploadId()
+            if item.get('type','')=='photo':
+                self.uploadPhoto(item['file'], caption=caption,is_sidecar=True,upload_id=item_upload_id)
+                #$itemInternalMetadata->setPhotoUploadResponse($this->ig->internal->uploadPhotoData(Constants::FEED_TIMELINE_ALBUM, $itemInternalMetadata));
+                
+            elif  item.get('type','')=='video':
+                # Attempt to upload the video data.
+                self.uploadVideo(item['file'], item['thumbnail'], caption = caption,is_sidecar=True,upload_id=item_upload_id)
+                #$itemInternalMetadata = $this->ig->internal->uploadVideo(Constants::FEED_TIMELINE_ALBUM, $item['file'], $itemInternalMetadata);
+                # Attempt to upload the thumbnail, associated with our video's ID.
+                #$itemInternalMetadata->setPhotoUploadResponse($this->ig->internal->uploadPhotoData(Constants::FEED_TIMELINE_ALBUM, $itemInternalMetadata));
+                pass
+            item['internalMetadata']['upload_id'] = item_upload_id
+            
+        albumInternalMetadata = {}
+        return self.configureTimelineAlbum(media, albumInternalMetadata, captionText=caption)
+        
+    def throwIfInvalidUsertags(self,usertags):
+        for user_position in usertags:
+            # Verify this usertag entry, ensuring that the entry is format
+            # ['position'=>[0.0,1.0],'user_id'=>'123'] and nothing else.
+            correct = True
+            if type(user_position) == type({}):
+                position = user_position.get('position',None)
+                user_id  = user_position.get('user_id',None)
+                
+                if type(position) == type([]) and len(position)==2:
+                    try:
+                        x = float(position[0])
+                        y = float(position[1])
+                        if x< 0.0 or x>1.0:
+                            correct = False
+                        if y< 0.0 or y>1.0:
+                            correct = False
+                    except:
+                        correct = False
+                try:
+                    user_id = long(user_id)
+                    if user_id<0:
+                        correct = False
+                except:
+                    correct = False
+            if not correct:
+                raise Exception('Invalid user entry in usertags array.')
+    
+    def configureTimelineAlbum(
+        self,
+        media,
+        albumInternalMetadata,
+        captionText ='',
+        location    = None):
+    
+        endpoint = 'media/configure_sidecar/'
+        albumUploadId = self.generateUploadId();
+        
+        date = datetime.utcnow().isoformat()
+        childrenMetadata = [];
+        for item in media:
+            itemInternalMetadata = item['internalMetadata'];
+            uploadId = itemInternalMetadata.get('upload_id',self.generateUploadId())
+            if item.get('type','') == 'photo':
+                #// Build this item's configuration.
+                photoConfig = {
+                    'date_time_original'  : date,
+                    'scene_type'          : 1,
+                    'disable_comments'    : False,
+                    'upload_id'           : uploadId,
+                    'source_type'         : 0,
+                    'scene_capture_type'  : 'standard',
+                    'date_time_digitized' : date,
+                    'geotag_enabled'      : False,
+                    'camera_position'     : 'back',
+                    'edits'               : {
+                        'filter_strength' : 1,
+                        'filter_name'     : 'IGNormalFilter',
+                    },
+                };
+                #// This usertag per-file EXTERNAL metadata is only supported for PHOTOS!
+                if item.get('usertags',[]):
+                    #// NOTE: These usertags were validated in Timeline::uploadAlbum.
+                    photoConfig['usertags'] = json.dumps({'in' : item['usertags']})
+                
+                childrenMetadata.append(photoConfig)
+            if item.get('type','') == 'video':
+                #// Get all of the INTERNAL per-VIDEO metadata.
+                videoDetails = itemInternalMetadata.get('video_details',{});
+                #// Build this item's configuration.
+                videoConfig = {
+                    'length'              : videoDetails.get('duration',1.0),
+                    'date_time_original'  : date,
+                    'scene_type'          : 1,
+                    'poster_frame_index'  : 0,
+                    'trim_type'           : 0,
+                    'disable_comments'    : False,
+                    'upload_id'           : uploadId,
+                    'source_type'         : 'library',
+                    'geotag_enabled'      : False,
+                    'edits'               : {
+                        'length'          : videoDetails.get('duration',1.0),#round($videoDetails->getDuration(), 1),
+                        'cinema'          : 'unsupported',
+                        'original_length' : videoDetails.get('duration',1.0),#round($videoDetails->getDuration(), 1),
+                        'source_type'     : 'library',
+                        'start_time'      : 0,
+                        'camera_position' : 'unknown',
+                        'trim_type'       : 0,
+                    },
+                }
+                
+                childrenMetadata.append(videoConfig)
+            
+        
+        #// Build the request...
+        
+        data = {
+            '_csrftoken'        : self.token,
+            '_uid'              : self.username_id,
+            '_uuid'             : self.uuid,
+            'client_sidecar_id' : albumUploadId,
+            'caption'           : captionText,
+            'children_metadata' : childrenMetadata,
+        }
+        self.SendRequest(endpoint, self.generateSignature(json.dumps(data)))
+        response = self.LastResponse
+        if response.status_code == 200:
+            self.LastResponse = response
+            self.LastJson = json.loads(response.text)
+            return True
+        else:
+            print ("Request return " + str(response.status_code) + " error!")
+            # for debugging
+            try:
+                self.LastResponse = response
+                self.LastJson = json.loads(response.text)
+            except:
+                pass
+            return False
+        """
+        #code from Request.Internal.configureTimelineAlbum (https://github.com/mgp25/Instagram-API/blob/master/src/Request/Internal.php)
+        $request = $this->ig->request($endpoint)
+            ->addPost('_csrftoken', $this->ig->client->getToken())
+            ->addPost('_uid', $this->ig->account_id)
+            ->addPost('_uuid', $this->ig->uuid)
+            ->addPost('client_sidecar_id', $albumUploadId)
+            ->addPost('caption', $captionText)
+            ->addPost('children_metadata', $childrenMetadata);
+        if ($location instanceof Response\Model\Location) {
+            $request
+                ->addPost('location', Utils::buildMediaLocationJSON($location))
+                ->addPost('geotag_enabled', '1')
+                ->addPost('posting_latitude', $location->getLat())
+                ->addPost('posting_longitude', $location->getLng())
+                ->addPost('media_latitude', $location->getLat())
+                ->addPost('media_longitude', $location->getLng())
+                ->addPost('exif_latitude', 0.0)
+                ->addPost('exif_longitude', 0.0);
+        }
+        $configure = $request->getResponse(new Response\ConfigureResponse());
+        return $configure;
+        """
+    
+    
+    
     def direct_share(self, media_id, recipients, text = None):
         if type(recipients) != type([]):
             recipients = [str(recipients)]
@@ -648,12 +853,14 @@ class InstagramAPI:
     def getLikedMedia(self,maxid=''):
         return self.SendRequest('feed/liked/?max_id='+str(maxid))
 
-    def generateSignature(self, data):
-        try:
-            parsedData = urllib.parse.quote(data)
-        except AttributeError:
-            parsedData = urllib.quote(data)
-
+    def generateSignature(self, data,skip_quote=False):
+        if not skip_quote:
+            try:
+                parsedData = urllib.parse.quote(data)
+            except AttributeError:
+                parsedData = urllib.quote(data)
+        else:
+            parsedData = data
         return 'ig_sig_key_version=' + self.SIG_KEY_VERSION + '&signed_body=' + hmac.new(self.IG_SIG_KEY.encode('utf-8'), data.encode('utf-8'), hashlib.sha256).hexdigest() + '.' + parsedData
 
     def generateDeviceId(self, seed):
@@ -676,7 +883,7 @@ class InstagramAPI:
         else:
             return generated_uuid.replace('-', '')
     
-    def generateUploadId():
+    def generateUploadId(self):
         return str(calendar.timegm(datetime.utcnow().utctimetuple()))
     
     def buildBody(self,bodies, boundary):
