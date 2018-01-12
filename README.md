@@ -1,5 +1,5 @@
 # Instagram-API-python
-<img src="https://img.shields.io/badge/Coverege-65%25-yellow.svg">
+<img src="https://img.shields.io/badge/Coverage-65%25-yellow.svg">
 <img src="https://img.shields.io/badge/Version-b%200.01-orange.svg">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US&item_name=GitHub%20donation&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted" title="Support project"><img src="https://img.shields.io/badge/Support%20project-paypal-brightgreen.svg"></a>
 <a href="https://github.com/LevPasha/Instagram-bot-cs" title="Instagram C# bot"><img src="https://img.shields.io/badge/C%23%20InstaBot-v1.0-blue.svg"></a>
