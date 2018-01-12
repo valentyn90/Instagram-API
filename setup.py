@@ -1,7 +1,7 @@
 from setuptools import setup
 
-setup(name='instagram-api',
-      version='0.1.1',
+setup(name='InstagramAPI',
+      version='1.0',
       description='Unofficial instagram API, give you access to ALL instagram features (like, follow, upload photo and video and etc)! Write on python.',
       url='https://github.com/LevPasha/Instagram-API-python/',
       author='Pasha Lev',

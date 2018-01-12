@@ -5,7 +5,7 @@
 
 from InstagramAPI import InstagramAPI
 
-api = InstagramAPI("pashatest", "Qq12344321")
+api = InstagramAPI("login", "pwd")
 api.login()  # login
 api.tagFeed("cat")  # get media list by tag #cat
 media_id = api.LastJson  # last response JSON
