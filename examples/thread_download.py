@@ -58,7 +58,7 @@ class DownloadThread():
 
 if __name__ == "__main__":
     user, pwd = '', ''  # your credentials
-    thread_id = ''  # id thread for download
+    thread_id = '' # id thread for download
 
     InstagramAPI = InstagramAPI(user, pwd)
     InstagramAPI.login()
