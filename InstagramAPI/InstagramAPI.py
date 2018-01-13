@@ -61,17 +61,27 @@ class InstagramAPI:
         self.setUser(username, password)
         self.isLoggedIn = False
         self.LastResponse = None
+        self.s = requests.Session()
 
     def setUser(self, username, password):
         self.username = username
         self.password = password
         self.uuid = self.generateUUID(True)
 
+    def setProxy(self, proxy=None):
+        """
+        Set proxy for all requests::
+
+        Proxy format - user:password@ip:port
+        """
+
+        if proxy is not None:
+            print('Set proxy!')
+            proxies = {'http': 'http://' + proxy, 'https': 'http://' + proxy}
+            self.s.proxies.update(proxies)
+
     def login(self, force=False):
         if (not self.isLoggedIn or force):
-            self.s = requests.Session()
-            # if you need proxy make something like this:
-            # self.s.proxies = {"https" : "http://proxyip:proxyport"}
             if (self.SendRequest('si/fetch_headers/?challenge_type=signup&guid=' + self.generateUUID(False), None, True)):
 
                 data = {'phone_id': self.generateUUID(True),
@@ -131,7 +141,7 @@ class InstagramAPI:
                 '_uuid': self.uuid,
                 '_csrftoken': self.token,
                 'image_compression': '{"lib_name":"jt","lib_version":"1.3.0","quality":"87"}',
-                'photo': ('pending_media_%s.jpg' % upload_id, open(photo, 'rb'), 'application/octet-stream', {'Content-Transfer-Encoding':'binary'})}
+                'photo': ('pending_media_%s.jpg' % upload_id, open(photo, 'rb'), 'application/octet-stream', {'Content-Transfer-Encoding': 'binary'})}
         if is_sidecar:
             data['is_sidecar'] = '1'
         m = MultipartEncoder(data, boundary=self.uuid)
@@ -214,39 +224,39 @@ class InstagramAPI:
     def uploadAlbum(self, media, caption=None, upload_id=None):
         if not media:
             raise Exception("List of media to upload can't be empty.")
-        
+
         if len(media) < 2 or len(media) > 10:
             raise Exception('Instagram requires that albums contain 2-10 items. You tried to submit {}.'.format(len(media)))
-        
+
         # Figure out the media file details for ALL media in the album.
         # NOTE: We do this first, since it validates whether the media files are
         # valid and lets us avoid wasting time uploading totally invalid albums!
         for idx, item in enumerate(media):
             if not item.get('file', '') or item.get('tipe', ''):
                 raise Exception('Media at index "{}" does not have the required "file" and "type" keys.'.format(idx))
-            
+
             # $itemInternalMetadata = new InternalMetadata();
             # If usertags are provided, verify that the entries are valid.
             if item.get('usertags', []):
                 self.throwIfInvalidUsertags(item['usertags'])
-            
+
             # Pre-process media details and throw if not allowed on Instagram.
             if item.get('type', '') == 'photo':
                 # Determine the photo details.
                 # $itemInternalMetadata->setPhotoDetails(Constants::FEED_TIMELINE_ALBUM, $item['file']);
                 pass
-                
+
             elif item.get('type', '') == 'video':
                 # Determine the video details.
                 # $itemInternalMetadata->setVideoDetails(Constants::FEED_TIMELINE_ALBUM, $item['file']);
                 pass
-                
+
             else:
                 raise Exception('Unsupported album media type "{}".'.format(item['type']))
-            
+
             itemInternalMetadata = {}
             item['internalMetadata'] = itemInternalMetadata
-            
+
         # Perform all media file uploads.
         for idx, item in enumerate(media):
             itemInternalMetadata = item['internalMetadata']
@@ -254,7 +264,7 @@ class InstagramAPI:
             if item.get('type', '') == 'photo':
                 self.uploadPhoto(item['file'], caption=caption, is_sidecar=True, upload_id=item_upload_id)
                 # $itemInternalMetadata->setPhotoUploadResponse($this->ig->internal->uploadPhotoData(Constants::FEED_TIMELINE_ALBUM, $itemInternalMetadata));
-                
+
             elif item.get('type', '') == 'video':
                 # Attempt to upload the video data.
                 self.uploadVideo(item['file'], item['thumbnail'], caption=caption, is_sidecar=True, upload_id=item_upload_id)
@@ -263,20 +273,20 @@ class InstagramAPI:
                 # $itemInternalMetadata->setPhotoUploadResponse($this->ig->internal->uploadPhotoData(Constants::FEED_TIMELINE_ALBUM, $itemInternalMetadata));
                 pass
             item['internalMetadata']['upload_id'] = item_upload_id
-            
+
         albumInternalMetadata = {}
         return self.configureTimelineAlbum(media, albumInternalMetadata, captionText=caption)
-        
+
     def throwIfInvalidUsertags(self, usertags):
         for user_position in usertags:
             # Verify this usertag entry, ensuring that the entry is format
             # ['position'=>[0.0,1.0],'user_id'=>'123'] and nothing else.
             correct = True
-            if type(user_position) == type({}):
+            if isinstance(user_position, dict):
                 position = user_position.get('position', None)
                 user_id = user_position.get('user_id', None)
-                
-                if type(position) == type([]) and len(position) == 2:
+
+                if isinstance(position, list) and len(position) == 2:
                     try:
                         x = float(position[0])
                         y = float(position[1])
@@ -294,11 +304,11 @@ class InstagramAPI:
                     correct = False
             if not correct:
                 raise Exception('Invalid user entry in usertags array.')
-    
+
     def configureTimelineAlbum(self, media, albumInternalMetadata, captionText='', location=None):
         endpoint = 'media/configure_sidecar/'
         albumUploadId = self.generateUploadId()
-        
+
         date = datetime.utcnow().isoformat()
         childrenMetadata = []
         for item in media:
@@ -322,7 +332,7 @@ class InstagramAPI:
                 if item.get('usertags', []):
                     # NOTE: These usertags were validated in Timeline::uploadAlbum.
                     photoConfig['usertags'] = json.dumps({'in': item['usertags']})
-                
+
                 childrenMetadata.append(photoConfig)
             if item.get('type', '') == 'video':
                 # Get all of the INTERNAL per-VIDEO metadata.
@@ -337,15 +347,16 @@ class InstagramAPI:
                                'upload_id': uploadId,
                                'source_type': 'library',
                                'geotag_enabled': False,
-                               'edits': {'length': videoDetails.get('duration', 1.0),
-                                         'cinema': 'unsupported',
-                                         'original_length': videoDetails.get('duration', 1.0),
-                                         'source_type': 'library',
-                                         'start_time': 0,
-                                         'camera_position': 'unknown',
-                                         'trim_type': 0}
+                               'edits': {
+                                   'length': videoDetails.get('duration', 1.0),
+                                   'cinema': 'unsupported',
+                                   'original_length': videoDetails.get('duration', 1.0),
+                                   'source_type': 'library',
+                                   'start_time': 0,
+                                   'camera_position': 'unknown',
+                                   'trim_type': 0}
                                }
-                
+
                 childrenMetadata.append(videoConfig)
         # Build the request...
         data = {'_csrftoken': self.token,
@@ -369,9 +380,9 @@ class InstagramAPI:
             except:
                 pass
             return False
-    
+
     def direct_share(self, media_id, recipients, text=None):
-        if type(recipients) != type([]):
+        if not isinstance(position, list):
             recipients = [str(recipients)]
         recipient_users = '"",""'.join(str(r) for r in recipients)
         endpoint = 'direct_v2/threads/broadcast/media_share/?media_type=photo'
@@ -412,7 +423,7 @@ class InstagramAPI:
                                'Accept-Language': 'en-en'})
         # self.SendRequest(endpoint,post=data) #overwrites 'Content-type' header and boundary is missed
         response = self.s.post(self.API_URL + endpoint, data=data)
-        
+
         if response.status_code == 200:
             self.LastResponse = response
             self.LastJson = json.loads(response.text)
@@ -466,9 +477,9 @@ class InstagramAPI:
                            'upload_id': upload_id,
                            'device': self.DEVICE_SETTINTS,
                            'edits': {
-                                'crop_original_size': [w * 1.0, h * 1.0],
-                                'crop_center': [0.0, 0.0],
-                                'crop_zoom': 1.0
+                               'crop_original_size': [w * 1.0, h * 1.0],
+                               'crop_center': [0.0, 0.0],
+                               'crop_zoom': 1.0
                            },
                            'extra': {
                                'source_width': w,
@@ -502,7 +513,7 @@ class InstagramAPI:
                            '_csrftoken': self.token,
                            'media_id': mediaId})
         return self.SendRequest('media/' + str(mediaId) + '/delete/', self.generateSignature(data))
-   
+
     def changePassword(self, newPassword):
         data = json.dumps({'_uuid': self.uuid,
                            '_uid': self.username_id,
@@ -511,7 +522,7 @@ class InstagramAPI:
                            'new_password1': newPassword,
                            'new_password2': newPassword})
         return self.SendRequest('accounts/change_password/', self.generateSignature(data))
-    
+
     def explore(self):
         return self.SendRequest('discover/explore/')
 
@@ -621,16 +632,11 @@ class InstagramAPI:
         return query
 
     def searchUsers(self, query):
-        query = self.SendRequest('users/search/?ig_sig_key_version='
-                                 + str(self.SIG_KEY_VERSION) 
-                                 + '&is_typeahead=true&query=' 
-                                 + str(query) + '&rank_token=' 
-                                 + str(self.rank_token))
+        query = self.SendRequest('users/search/?ig_sig_key_version=' + str(self.SIG_KEY_VERSION) + '&is_typeahead=true&query=' + str(query) + '&rank_token=' + str(self.rank_token))
         return query
 
     def searchUsername(self, usernameName):
-        query = self.SendRequest('users/' + str(usernameName) 
-                                 + '/usernameinfo/')
+        query = self.SendRequest('users/' + str(usernameName) + '/usernameinfo/')
         return query
 
     def syncFromAdressBook(self, contacts):
@@ -641,31 +647,26 @@ class InstagramAPI:
         return query
 
     def getTimeline(self):
-        query = self.SendRequest('feed/timeline/?rank_token=' 
-                                 + str(self.rank_token) 
-                                 + '&ranked_content=true&')
+        query = self.SendRequest('feed/timeline/?rank_token=' + str(self.rank_token) + '&ranked_content=true&')
         return query
 
     def getUserFeed(self, usernameId, maxid='', minTimestamp=None):
-        query = self.SendRequest('feed/user/' + str(usernameId) + '/?max_id=' 
-                                 + str(maxid) + '&min_timestamp=' 
-                                 + str(minTimestamp) + '&rank_token=' 
-                                 + str(self.rank_token) 
-                                 + '&ranked_content=true')
+        query = self.SendRequest('feed/user/%s/?max_id=%s&min_timestamp=%s&rank_token=%s&ranked_content=true'
+                                 % (usernameId, maxid, minTimestamp, self.rank_token))
         return query
 
     def getSelfUserFeed(self, maxid='', minTimestamp=None):
         return self.getUserFeed(self.username_id, maxid, minTimestamp)
 
     def getHashtagFeed(self, hashtagString, maxid=''):
-        return self.SendRequest('feed/tag/'+hashtagString+'/?max_id=' + str(maxid) + '&rank_token=' + self.rank_token + '&ranked_content=true&')
+        return self.SendRequest('feed/tag/' + hashtagString + '/?max_id=' + str(maxid) + '&rank_token=' + self.rank_token + '&ranked_content=true&')
 
     def searchLocation(self, query):
         locationFeed = self.SendRequest('fbsearch/places/?rank_token=' + str(self.rank_token) + '&query=' + str(query))
         return locationFeed
 
     def getLocationFeed(self, locationId, maxid=''):
-        return self.SendRequest('feed/location/'+str(locationId)+'/?max_id=' + maxid + '&rank_token=' + self.rank_token + '&ranked_content=true&')
+        return self.SendRequest('feed/location/' + str(locationId) + '/?max_id=' + maxid + '&rank_token=' + self.rank_token + '&ranked_content=true&')
 
     def getPopularFeed(self):
         popularFeed = self.SendRequest('feed/popular/?people_teaser_supported=1&rank_token=' + str(self.rank_token) + '&ranked_content=true&')
@@ -681,7 +682,6 @@ class InstagramAPI:
             url += urllib.parse.urlencode(query_string)
         else:
             url += urllib.urlencode(query_string)
-        
         return self.SendRequest(url)
 
     def getSelfUsersFollowing(self):
@@ -764,7 +764,7 @@ class InstagramAPI:
         return self.SendRequest('friendships/show/' + str(userId) + '/', self.generateSignature(data))
 
     def getLikedMedia(self, maxid=''):
-        return self.SendRequest('feed/liked/?max_id='+str(maxid))
+        return self.SendRequest('feed/liked/?max_id=' + str(maxid))
 
     def generateSignature(self, data, skip_quote=False):
         if not skip_quote:
@@ -798,11 +798,11 @@ class InstagramAPI:
             body += u'--{boundary}\r\n'.format(boundary=boundary)
             body += u'Content-Disposition: {b_type}; name="{b_name}"'.format(b_type=b['type'], b_name=b['name'])
             _filename = b.get('filename', None)
-            _headers  = b.get('headers', None)
+            _headers = b.get('headers', None)
             if _filename:
                 _filename, ext = os.path.splitext(_filename)
                 _body += u'; filename="pending_media_{uid}.{ext}"'.format(uid=self.generateUploadId(), ext=ext)
-            if _headers and type(_headers) == type([]):
+            if _headers and isinstance(_headers, list):
                 for h in _headers:
                     _body += u'\r\n{header}'.format(header=h)
             body += u'\r\n\r\n{data}\r\n'.format(data=b['data'])
@@ -810,6 +810,8 @@ class InstagramAPI:
         return body
 
     def SendRequest(self, endpoint, post=None, login=False):
+        verify = False  # don't show request warning
+
         if (not self.isLoggedIn and not login):
             raise Exception("Not logged in!\n")
 
@@ -819,10 +821,17 @@ class InstagramAPI:
                                'Cookie2': '$Version=1',
                                'Accept-Language': 'en-US',
                                'User-Agent': self.USER_AGENT})
-        if (post is not None):
-            response = self.s.post(self.API_URL + endpoint, data=post)  # , verify=False
-        else:
-            response = self.s.get(self.API_URL + endpoint)  # , verify=False
+
+        while True:
+            try:
+                if (post is not None):
+                    response = self.s.post(self.API_URL + endpoint, data=post, verify=verify)
+                else:
+                    response = self.s.get(self.API_URL + endpoint, verify=verify)
+                break
+            except Exception as e:
+                print('Except on SendRequest (wait 60 sec and resend): ' + str(e))
+                time.sleep(60)
 
         if response.status_code == 200:
             self.LastResponse = response
@@ -834,6 +843,7 @@ class InstagramAPI:
             try:
                 self.LastResponse = response
                 self.LastJson = json.loads(response.text)
+                print(self.LastJson)
             except:
                 pass
             return False
@@ -850,7 +860,7 @@ class InstagramAPI:
 
             if temp["big_list"] is False:
                 return followers
-            next_max_id = temp["next_max_id"]         
+            next_max_id = temp["next_max_id"]
 
     def getTotalFollowings(self, usernameId):
         followers = []
@@ -864,7 +874,7 @@ class InstagramAPI:
 
             if temp["big_list"] is False:
                 return followers
-            next_max_id = temp["next_max_id"] 
+            next_max_id = temp["next_max_id"]
 
     def getTotalUserFeed(self, usernameId, minTimestamp=None):
         user_feed = []
@@ -879,7 +889,7 @@ class InstagramAPI:
             next_max_id = temp["next_max_id"]
 
     def getTotalSelfUserFeed(self, minTimestamp=None):
-        return self.getTotalUserFeed(self.username_id, minTimestamp) 
+        return self.getTotalUserFeed(self.username_id, minTimestamp)
 
     def getTotalSelfFollowers(self):
         return self.getTotalFollowers(self.username_id)
