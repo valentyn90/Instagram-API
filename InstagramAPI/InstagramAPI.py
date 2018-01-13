@@ -586,6 +586,9 @@ class InstagramAPI:
     def getSelfUsernameInfo(self):
         return self.getUsernameInfo(self.username_id)
 
+    def getSelfSavedMedia(self):
+        return self.SendRequest('feed/saved')
+
     def getRecentActivity(self):
         activity = self.SendRequest('news/inbox/?')
         return activity
