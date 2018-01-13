@@ -29,12 +29,11 @@ The new fake Instagram account with an unverifird phone number after ~ 1-24 hour
     `pip install -r requirements.txt`
 
 
-4. Modify test.py with your own username and password
+4. Modify examples\test.py with your own username and password
 
 
-5. Run the test script (**use text editor to edit the script and type in valid Instagram username/password**)
+5. Run the test.py script (**use text editor to edit the script and type in valid Instagram username/password**)
 
-    `python test.py`
 
 
 ### Pip Installation Instructions
