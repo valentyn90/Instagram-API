@@ -16,6 +16,11 @@ from datetime import datetime
 import calendar
 import os
 from requests_toolbelt import MultipartEncoder
+
+# Turn off InsecureRequestWarning
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 try:
     from moviepy.editor import VideoFileClip
 except:
@@ -24,7 +29,6 @@ except:
 # The urllib library was split into other modules from Python 2 to Python 3
 if sys.version_info.major == 3:
     import urllib.parse
-
 try:
     from ImageUtils import getImageSize
 except:
