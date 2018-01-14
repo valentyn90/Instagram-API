@@ -583,7 +583,10 @@ class InstagramAPI:
                            'email': email,
                            'gender': gender})
         return self.SendRequest('accounts/edit_profile/', self.generateSignature(data))
-
+    
+    def getStory(self, usernameId):
+        return self.SendRequest('feed/user/' + str(usernameId) + '/reel_media/')
+    
     def getUsernameInfo(self, usernameId):
         return self.SendRequest('users/' + str(usernameId) + '/info/')
 
