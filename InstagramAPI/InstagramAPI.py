@@ -583,10 +583,10 @@ class InstagramAPI:
                            'email': email,
                            'gender': gender})
         return self.SendRequest('accounts/edit_profile/', self.generateSignature(data))
-    
+
     def getStory(self, usernameId):
         return self.SendRequest('feed/user/' + str(usernameId) + '/reel_media/')
-    
+
     def getUsernameInfo(self, usernameId):
         return self.SendRequest('users/' + str(usernameId) + '/info/')
 
@@ -706,6 +706,9 @@ class InstagramAPI:
     def getSelfUserFollowers(self):
         return self.getUserFollowers(self.username_id)
 
+    def getPendingFollowRequests(self):
+        return self.SendRequest('friendships/pending?')
+
     def like(self, mediaId):
         data = json.dumps({'_uuid': self.uuid,
                            '_uid': self.username_id,
@@ -737,6 +740,24 @@ class InstagramAPI:
     def backup(self):
         # TODO Instagram.php 1470-1485
         return False
+
+    def approve(self, userId):
+        data = json.dumps({
+        '_uuid'         : self.uuid,
+        '_uid'          : self.username_id,
+        'user_id'       : userId,
+        '_csrftoken'    : self.token
+        })
+        return self.SendRequest('friendships/approve/'+ str(userId) + '/', self.generateSignature(data))
+
+    def ignore(self, userId):
+        data = json.dumps({
+        '_uuid'         : self.uuid,
+        '_uid'          : self.username_id,
+        'user_id'       : userId,
+        '_csrftoken'    : self.token
+        })
+        return self.SendRequest('friendships/ignore/'+ str(userId) + '/', self.generateSignature(data))
 
     def follow(self, userId):
         data = json.dumps({'_uuid': self.uuid,
