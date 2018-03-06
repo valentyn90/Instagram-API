@@ -66,6 +66,6 @@ if __name__ == "__main__":
     InstagramAPI = InstagramAPI("login", "password")
     InstagramAPI.login()
 
-    inst = DownloadThead(InstagramAPI, thread_id)
+    inst = DownloadThread(InstagramAPI, thread_id)
     inst.download()
     inst.save()
